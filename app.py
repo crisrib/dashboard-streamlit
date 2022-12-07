@@ -10,13 +10,15 @@ from st_aggrid import AgGrid
 # Page Setting
 st.set_page_config(layout='wide')
 
-st.title("Welcome to NFL Offensive Dashboard") # Title of the Website
-st.subheader("NFL Passing,Rushing,Recieving Yards from 09-2019 to 11-2022 ") # Subheader
+# Title of the Website
+st.title("Leading Causes of Death")
+# Subheader
+st.subheader("United States report from 1999 to 2017 ")
 
 # Importing Dataframe
-st.header("This is the dataframe")
+st.header("Data")   
 def load_data (nrows):
-    df = pd.read_excel('data/nfl_pass_rush_receive_raw_data.xls', nrows=nrows)
+    df = pd.read_excel('data/LCODUSdata.cvs.csv', nrows=nrows)
     lowercase = lambda x:str(x).title()
     df.rename (lowercase, axis='columns',inplace=True)
     return df
@@ -24,46 +26,40 @@ def load_data (nrows):
 df = load_data (100)
 list(df.columns)
 
-#Example code of a show and hide checkbox
+# Clean data for filtering 
+df.columns = df.columns.str.replace(' ', '_')
 
+# Show and hide checkbox
 if st.checkbox('Show dataframe'):
     chart_data = AgGrid(df)
-
-
-# Clean data for filtering 
- 
-df.columns = df.columns.str.replace(' ', '_')
 
 #SideBar Panel
 st.sidebar.header("Please Select Filter Here:")
 
-Pos = st.sidebar.multiselect(
-    "Select the Position",
-    options=df['Pos'].unique(),
-    default=df['Pos'].unique()
+Cause = st.sidebar.multiselect(
+    "Select the Cause",
+    options=df['Cause'].unique(),
+    default=df['Cause'].unique()
 )
-Team = st.sidebar.multiselect(
-    "Select the Team",
-    options=df['Team'].unique(),
-    default=df['Team'].unique()
+State = st.sidebar.multiselect(
+    "Select the State",
+    options=df['State'].unique(),
+    default=df['State'].unique()
 )
-Player = st.sidebar.multiselect(
-    "Select the Player",
-    options=df['Player'].unique(),
-    default=df['Player'].unique()
+Year = st.sidebar.multiselect(
+    "Select the Year",
+    options=df['Year'].unique(),
+    default=df['Year'].unique()
 )
-
 
 
 df_selection = df.query(
-    "Player == @Player & Team == @Team & Pos == @Pos"
+    "Cause == @Cause & State == @State & Year == @Year"
 
 )
 st.title("Filtered dataframe by Sidebar")
 st.dataframe(df_selection)
 
+st.bar_chart(data=df,x='State',y='Deaths', width=0, height=0, use_container_width=True)
 
-st.bar_chart(data=df,x='Player',y='Pass_Yds', width=0, height=0, use_container_width=True)
-
-
-st.line_chart(data=df, y='Pass_Sacked', x='Team', width=0, height=0, use_container_width=True)
+st.line_chart(data=df, y='Cause', x='Deaths', width=0, height=0, use_container_width=True)
